@@ -5,11 +5,12 @@ import asyncHandler from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { check } from "prettier";
+import { UserCart } from "../models/userCart";
 const userType = z.object({
   username: z.string(),
   password: z.string().min(5),
   email: z.string(),
-  avatar:z.string()
+  avatar: z.string(),
 });
 
 const generateAccessToken = async (userId: string) => {
@@ -23,59 +24,37 @@ const generateAccessToken = async (userId: string) => {
   }
 };
 
-export const registerUser=asyncHandler(async(req:Request,res:Response)=>{
-    const body=req.body;
-    const zodBody=userType.safeParse(body);
-    if(zodBody.success){
-        const{username,password,email,avatar}=zodBody.data;
-        let checkUser=await User.findOne({
-            $or:[{"username":username},{'email':email}]
-        })
-        if(!checkUser){
-            let newUser=new User({
-                username,
-                email,
-                password,
-                avatar
-            })
-            await newUser.save();
-            console.log(newUser);
-            res.status(201).json(
-                 new ApiResponse(200,'user succesfully created')
-            )
-        }
-        else{
-            throw new ApiError(401,'user already exists');
-        }
+export const registerUser = asyncHandler(
+  async (req: Request, res: Response) => {
+    const body = req.body;
+    const zodBody = userType.safeParse(body);
+    if (zodBody.success) {
+      const { username, password, email, avatar } = zodBody.data;
+      let checkUser = await User.findOne({
+        $or: [{ username: username }, { email: email }],
+      });
+      if (!checkUser) {
+        let newUser = new User({
+          username,
+          email,
+          password,
+          avatar,
+        });
+        await newUser.save();
+        const newCart=new UserCart({userId:newUser._id});
+        await newCart.save();
+        newUser.cart=newCart._id;
+        await newUser.save();
+  
+        res.status(201).json(new ApiResponse(200, "user succesfully created"));
+      } else {
+        throw new ApiError(401, "user already exists");
+      }
+    } else {
+      res.json(zodBody.error);
     }
-    else{
-        res.json(zodBody.error)
-    }
-
-})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
+);
 
 export const userLogin = asyncHandler(async (req: Request, res: Response) => {
   const detailBody = req.body;

@@ -7,6 +7,7 @@ import asyncHandler from "../utils/asyncHandler";
 import ProductModel from "../models/products";
 import { ApiResponse } from "../utils/ApiResponse";
 import { z } from "zod";
+import { Category } from "../models/category";
 
 const productType = z.object({
   name: z.string(),
@@ -33,7 +34,9 @@ export const createProduct=asyncHandler(async(req:Request,res:Response)=>{
         price,
         category
 })
+
 await newProduct.save();
 console.log('product saved');
+console.log(newProduct)
 res.status(201).json(new ApiResponse(201,newProduct));
 });

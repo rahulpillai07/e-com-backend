@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { Category } from "./category";
+import { ApiError } from "../utils/ApiError";
 
 interface Product extends Document {
   name: string;
@@ -26,6 +28,26 @@ const productSchema = new Schema<Product>({
   },
 },{timestamps:true});
 
+productSchema.pre('save', async function(next) {
+  try {
+    // Find the corresponding category and update its products array
+    const updatedCategory = await Category.findByIdAndUpdate(
+      this.category,
+      { $addToSet: { products: this._id } },
+      { new: true }
+    );
+
+    if (!updatedCategory) {
+      throw new Error("Category not found");
+    }
+
+    next();
+  } catch (error) {
+    throw new ApiError(401,'something went wrong');
+  }
+});
 const ProductModel = mongoose.model<Product>('Product', productSchema);
+
+
 
 export default ProductModel;

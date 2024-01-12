@@ -38,11 +38,14 @@ const userSchema = new Schema<UserInterface>(
     refreshToken: {
       type: String,
     },
-    cart:[{
-      type: mongoose.Schema.Types.ObjectId,
-      ref:'UserCart',
-      default:null
-    }]
+    cart: {
+      type: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserCart',
+      }],
+      default: [],
+    },
+    
   },
   {
     timestamps: true,
@@ -72,6 +75,8 @@ userSchema.methods.generateAccessToken = function(){
       }
   )
 }
+
+
 
 
 export const User=mongoose.models.User || mongoose.model('User',userSchema)

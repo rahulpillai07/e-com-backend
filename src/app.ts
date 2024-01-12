@@ -2,6 +2,7 @@ import express from "express";
 import userRouter from "./routes/user.route";
 import categoryRouter from "./routes/category.route"
 import productRouter from "./routes/product.route"
+import cartRouter from"./routes/cart.controller"
 import cors from "cors";
 const app = express();
 app.use(
@@ -17,4 +18,5 @@ app.use(express.static("public"));
 app.use("/api/users", userRouter);
 app.use("/api/category",categoryRouter)
 app.use("/api/product",productRouter)
+app.use("/api/cart",cartRouter)
 export default app;
